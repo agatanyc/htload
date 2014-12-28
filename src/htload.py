@@ -100,7 +100,9 @@ def deep_compare(xs, ys):
 def loads(html):
     """(str) -> list
 
-    Deserialize HTML, and return a list of strings and dicts.
+    Deserialize HTML, and return a list of strings and dicts.  Matches
+    BeautifulSoup's treatment of whitespace (e.g., squeezing sequences of
+    whitespace into a single character).
     """
     return compress_space(coalesce_text(children_of(bs4.BeautifulSoup(html))))
 
@@ -126,7 +128,7 @@ if __name__ == '__main__':
             "attributes"    : { },
             "children"      : [ "Algorithm Requirements" ]
         },
-        "\n\n",
+        "\n",
         {   "tag"           : "p",
             "attributes"    : { },
             "children"      : [
@@ -141,31 +143,31 @@ if __name__ == '__main__':
                 ":"
             ]
         },
-        "\n\n",
+        "\n",
         {   "tag"           :  "ol",
             "attributes"    : { "class": ["big", "bad"] },
             "children"      : [
-                "\n  ",
+                "\n",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Finiteness" ]
                 },
-                "\n  ",
+                "\n",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Definiteness" ]
                 },
-                "\n  ",
+                "\n",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Input" ]
                 },
-                "\n  ",
+                "\n",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Output" ]
                 },
-                "\n  ",
+                "\n",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Correctness" ]
@@ -175,9 +177,6 @@ if __name__ == '__main__':
         },
         "\n"
     ]
-
-    # Match BeautifulSoup's treatment of whitespace.
-    expected = compress_space(coalesce_text(expected))
 
     actual = loadf("test.html")
 

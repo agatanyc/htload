@@ -41,10 +41,46 @@ def from_soup(element):
 def coalesce_text(nodes):
     """(list) -> list
 
-    Returns the result of replacing each sequence of consecutive strings in
+    Return the result of replacing each sequence of consecutive strings in
     `nodes` with a single string.  Does not modify `nodes`.
     """
-    pass # TODO
+    r = []
+    for node in nodes:
+        if type(node) == dict:
+            r.append({
+                "tag"           : node["tag"],
+                "attributes"    : node["attributes"],
+                "children"      : coalesce_text(node["children"])
+            })
+        else:
+            assert(type(node) == str)
+            if r and type(r[-1]) == str:
+                r[-1] += node
+            else:
+                r.append(node)
+    return r
+
+def compress_space(nodes):
+    """(list) -> list
+
+    Return the result of omitting redundant whitespace from strings in `nodes`;
+    e.g., '\n\n  ' becomes '\n'.  Does not modify `nodes`.
+    """
+    r = []
+    for node in nodes:
+        if type(node) == dict:
+            r.append({
+                "tag"           : node["tag"],
+                "attributes"    : node["attributes"],
+                "children"      : compress_space(node["children"])
+            })
+        else:
+            assert(type(node) == str)
+            if node and node.isspace():
+                r.append(node[0])
+            else:
+                r.append(node)
+    return r
 
 def deep_compare(xs, ys):
     if type(xs) != type(ys):
@@ -66,7 +102,7 @@ def loads(html):
 
     Deserialize HTML, and return a list of strings and dicts.
     """
-    return children_of(bs4.BeautifulSoup(html))
+    return compress_space(coalesce_text(children_of(bs4.BeautifulSoup(html))))
 
 def load(file):
     """(stream) -> list
@@ -90,7 +126,7 @@ if __name__ == '__main__':
             "attributes"    : { },
             "children"      : [ "Algorithm Requirements" ]
         },
-        "\n", "", "\n",
+        "\n\n",
         {   "tag"           : "p",
             "attributes"    : { },
             "children"      : [
@@ -105,31 +141,31 @@ if __name__ == '__main__':
                 ":"
             ]
         },
-        "\n",   # TODO Work around BeautifulSoup whitespace compression: "\n\n"
+        "\n\n",
         {   "tag"           :  "ol",
             "attributes"    : { "class": ["big", "bad"] },
             "children"      : [
-                "\n",
+                "\n  ",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Finiteness" ]
                 },
-                "\n",
+                "\n  ",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Definiteness" ]
                 },
-                "\n",
+                "\n  ",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Input" ]
                 },
-                "\n",
+                "\n  ",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Output" ]
                 },
-                "\n",
+                "\n  ",
                 {   "tag"           : "li",
                     "attributes"    : { },
                     "children"      : [ "Correctness" ]
@@ -139,6 +175,9 @@ if __name__ == '__main__':
         },
         "\n"
     ]
+
+    # Match BeautifulSoup's treatment of whitespace.
+    expected = compress_space(coalesce_text(expected))
 
     actual = loadf("test.html")
 

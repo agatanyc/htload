@@ -27,9 +27,8 @@ def from_tag(tag):
 def from_soup(element):
     """(bs4 element) -> str or dict
 
-    Tag elements are converted to Python dictionaries.  NavigableString
-    elements are converted to Python strings.  All other element types are
-    converted to empty strings.
+    Convert tag elements to Python dictionaries, NavigableString elements to
+    Python strings, and all other element types to empty strings.
     """
     if is_tag(element):
         return from_tag(element)
@@ -41,8 +40,8 @@ def from_soup(element):
 def coalesce_text(nodes):
     """(list) -> list
 
-    Return the result of replacing each sequence of consecutive strings in
-    `nodes` with a single string.  Does not modify `nodes`.
+    Return the result of concatenating consecutive strings in `nodes`.  Does
+    not modify `nodes`.
     """
     r = []
     for node in nodes:
@@ -76,7 +75,9 @@ def compress_space(nodes):
             })
         else:
             assert(type(node) == str)
-            if node and node.isspace():
+            if not node:
+                pass    # Omit empty strings
+            elif node.isspace():
                 r.append(node[0])
             else:
                 r.append(node)
